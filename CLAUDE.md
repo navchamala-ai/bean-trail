@@ -56,3 +56,7 @@ src/
 - `app.json` - Expo configuration (app name, bundle IDs, icons)
 - `tsconfig.json` - TypeScript config with strict mode and path aliases
 - `.eslintrc.js` - ESLint configuration extends expo preset
+
+## Project-Specific Agents
+
+Agent definitions are stored in `.claude/agents/` for project-specific workflows. Use the Agent tool with `agent_file=".claude/agents/[agent-name].md"` to invoke them.
