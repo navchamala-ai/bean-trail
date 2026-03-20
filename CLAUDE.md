@@ -30,17 +30,35 @@ npm test               # Run Jest tests
 
 **Tech Stack:**
 - Expo SDK 52 with React Native 0.76
+- Expo Router (file-based routing, similar to Next.js App Router)
+- NativeWind (Tailwind CSS for React Native)
 - TypeScript with strict mode enabled
-- Entry point: `App.tsx`
+
+**Architecture Note:**
+This is the mobile app portion of Bean Trail. The backend API (Next.js) will be in a separate repository and consumed by this app over HTTPS.
 
 **Project Structure:**
 ```
+app/                 # Expo Router pages (file-based routing)
+  ├── _layout.tsx    # Root layout
+  └── index.tsx      # Home screen
 src/
-  ├── components/   # Reusable UI components
-  ├── screens/      # Screen-level components
-  ├── utils/        # Helper functions and utilities
-  └── types/        # TypeScript type definitions
+  ├── components/    # Reusable UI components
+  ├── screens/       # Screen-level components (for complex screens)
+  ├── utils/         # Helper functions and utilities
+  └── types/         # TypeScript type definitions
 ```
+
+**Routing:**
+- Uses Expo Router for file-based navigation
+- Files in `app/` directory automatically become routes
+- `app/index.tsx` → home screen
+- `app/profile.tsx` → /profile route
+
+**Styling:**
+- NativeWind provides Tailwind utility classes for React Native
+- Use `className` prop on components: `<View className="flex-1 bg-white">`
+- Configured in `tailwind.config.js` and `babel.config.js`
 
 **Path Aliases:**
 - `@/*` maps to `src/*` (configured in tsconfig.json)
@@ -49,12 +67,16 @@ src/
 **Platform Configuration:**
 - iOS bundle identifier: `com.beantrail.app`
 - Android package: `com.beantrail.app`
+- Deep link scheme: `beantrail://`
 - Assets directory: `./assets/`
 
 ## Key Configuration Files
 
-- `app.json` - Expo configuration (app name, bundle IDs, icons)
+- `app.json` - Expo configuration (app name, bundle IDs, icons, Expo Router plugin)
 - `tsconfig.json` - TypeScript config with strict mode and path aliases
+- `tailwind.config.js` - Tailwind CSS configuration for NativeWind
+- `babel.config.js` - Babel config with NativeWind plugin
+- `global.d.ts` - TypeScript declarations for NativeWind types
 - `.eslintrc.js` - ESLint configuration extends expo preset
 
 ## Project-Specific Agents
