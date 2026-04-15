@@ -14,21 +14,29 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.beantrail.app"
+      "bundleIdentifier": "com.beantrail.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Bean Trail uses your location to tag where you're enjoying your coffee."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.beantrail.app"
+      "package": "com.beantrail.app",
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-sqlite"
     ]
   }
 }
