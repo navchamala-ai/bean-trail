@@ -16,7 +16,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.beantrail.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Bean Trail uses your location to tag where you're enjoying your coffee."
+        "NSLocationWhenInUseUsageDescription": "Bean Trail uses your location to tag where you're enjoying your coffee.",
+        "NSPhotoLibraryUsageDescription": "Bean Trail saves photos of your coffee check-ins.",
+        "NSCameraUsageDescription": "Bean Trail lets you snap a photo of your coffee for each check-in."
       }
     },
     "android": {
@@ -36,7 +38,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-image-picker"
     ]
   }
 }

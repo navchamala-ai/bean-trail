@@ -10,8 +10,12 @@ import {
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
-import { insertCheckIn } from '@/utils/database';
+import { insertCheckIn } from '@/data/checkInRepo';
+import { evaluateAndPersist } from '@/data/badgeRepo';
+import { getAllCheckIns } from '@/data/checkInRepo';
 import StarRating from '@/components/StarRating';
+import PhotoPicker from '@/components/PhotoPicker';
+import FlavorPicker from '@/components/FlavorPicker';
 import { BEAN_TYPES, BREW_METHODS } from '@/types';
 
 export default function NewCheckInScreen() {
@@ -23,28 +27,23 @@ export default function NewCheckInScreen() {
   const [brewMethod, setBrewMethod] = useState('Espresso');
   const [rating, setRating] = useState(3);
   const [tastingNotes, setTastingNotes] = useState('');
+  const [flavorNotes, setFlavorNotes] = useState<string[]>([]);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [venueName, setVenueName] = useState('');
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState('');
 
-  useEffect(() => {
-    fetchLocation();
-  }, []);
+  useEffect(() => { fetchLocation(); }, []);
 
   async function fetchLocation() {
     setLocationLoading(true);
     setLocationError('');
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setLocationError('Location permission denied');
-        return;
-      }
-      const loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
+      if (status !== 'granted') { setLocationError('Location permission denied'); return; }
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       setLatitude(loc.coords.latitude);
       setLongitude(loc.coords.longitude);
     } catch {
@@ -55,14 +54,8 @@ export default function NewCheckInScreen() {
   }
 
   function handleSave() {
-    if (!coffeeName.trim()) {
-      Alert.alert('Missing field', 'Please enter a coffee name.');
-      return;
-    }
-    if (!roaster.trim()) {
-      Alert.alert('Missing field', 'Please enter a roaster.');
-      return;
-    }
+    if (!coffeeName.trim()) { Alert.alert('Missing field', 'Please enter a coffee name.'); return; }
+    if (!roaster.trim()) { Alert.alert('Missing field', 'Please enter a roaster.'); return; }
 
     insertCheckIn({
       coffeeName: coffeeName.trim(),
@@ -71,17 +64,26 @@ export default function NewCheckInScreen() {
       brewMethod,
       rating,
       tastingNotes: tastingNotes.trim(),
+      flavorNotes,
+      photoUri,
       venueName: venueName.trim(),
       latitude,
       longitude,
     });
 
+    evaluateAndPersist(getAllCheckIns());
     router.back();
   }
 
   return (
     <ScrollView className="flex-1 bg-amber-50" keyboardShouldPersistTaps="handled">
-      <View className="p-4 gap-4">
+      <View className="p-4 gap-5">
+
+        {/* Photo */}
+        <View>
+          <Text className="text-sm font-semibold text-gray-700 mb-2">Photo</Text>
+          <PhotoPicker uri={photoUri} onChange={setPhotoUri} />
+        </View>
 
         {/* Coffee Name */}
         <View>
@@ -115,19 +117,9 @@ export default function NewCheckInScreen() {
               <TouchableOpacity
                 key={type}
                 onPress={() => setBeanType(type)}
-                className={`px-4 py-2 rounded-full border ${
-                  beanType === type
-                    ? 'bg-amber-800 border-amber-800'
-                    : 'bg-white border-gray-200'
-                }`}
+                className={`px-4 py-2 rounded-full border ${beanType === type ? 'bg-amber-800 border-amber-800' : 'bg-white border-gray-200'}`}
               >
-                <Text
-                  className={`text-sm font-medium ${
-                    beanType === type ? 'text-white' : 'text-gray-600'
-                  }`}
-                >
-                  {type}
-                </Text>
+                <Text className={`text-sm font-medium ${beanType === type ? 'text-white' : 'text-gray-600'}`}>{type}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -141,19 +133,9 @@ export default function NewCheckInScreen() {
               <TouchableOpacity
                 key={method}
                 onPress={() => setBrewMethod(method)}
-                className={`px-4 py-2 rounded-full border ${
-                  brewMethod === method
-                    ? 'bg-amber-800 border-amber-800'
-                    : 'bg-white border-gray-200'
-                }`}
+                className={`px-4 py-2 rounded-full border ${brewMethod === method ? 'bg-amber-800 border-amber-800' : 'bg-white border-gray-200'}`}
               >
-                <Text
-                  className={`text-sm font-medium ${
-                    brewMethod === method ? 'text-white' : 'text-gray-600'
-                  }`}
-                >
-                  {method}
-                </Text>
+                <Text className={`text-sm font-medium ${brewMethod === method ? 'text-white' : 'text-gray-600'}`}>{method}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -165,12 +147,20 @@ export default function NewCheckInScreen() {
           <StarRating rating={rating} onRate={setRating} size="lg" />
         </View>
 
+        {/* Flavor Notes */}
+        <View>
+          <Text className="text-sm font-semibold text-gray-700 mb-2">Flavor Notes</Text>
+          <View className="bg-white rounded-xl p-3 border border-gray-100">
+            <FlavorPicker selected={flavorNotes} onChange={setFlavorNotes} />
+          </View>
+        </View>
+
         {/* Tasting Notes */}
         <View>
           <Text className="text-sm font-semibold text-gray-700 mb-1">Tasting Notes</Text>
           <TextInput
             className="bg-white rounded-xl px-4 py-3 text-gray-900 border border-gray-100"
-            placeholder="Fruity, chocolatey, nutty..."
+            placeholder="Describe your experience in your own words..."
             placeholderTextColor="#9ca3af"
             value={tastingNotes}
             onChangeText={setTastingNotes}
@@ -180,7 +170,7 @@ export default function NewCheckInScreen() {
           />
         </View>
 
-        {/* Venue / Location */}
+        {/* Venue */}
         <View>
           <Text className="text-sm font-semibold text-gray-700 mb-1">Venue</Text>
           <TextInput
@@ -201,9 +191,7 @@ export default function NewCheckInScreen() {
             ) : (
               <TouchableOpacity onPress={fetchLocation}>
                 <Text className="text-xs text-amber-700">
-                  {locationError
-                    ? `⚠ ${locationError} — tap to retry`
-                    : '📍 Tap to get GPS location'}
+                  {locationError ? `⚠ ${locationError} — tap to retry` : '📍 Tap to get GPS location'}
                 </Text>
               </TouchableOpacity>
             )}

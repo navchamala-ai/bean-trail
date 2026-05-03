@@ -1,11 +1,13 @@
 import '../global.css';
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
-import { initDatabase } from '@/utils/database';
+import { runMigrations } from '@/data/migrations';
+import { ensureSeeded } from '@/data/seed';
 
 export default function RootLayout() {
   useEffect(() => {
-    initDatabase();
+    runMigrations();
+    ensureSeeded();
   }, []);
 
   return (
